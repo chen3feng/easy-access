@@ -551,7 +551,7 @@ configNginx() {
                 # for more information.
                 include /etc/nginx/conf.d/*.conf;
             }
-        EOF
+EOF
     fi
 
     if [[ "$PROXY_URL" == "" ]]; then
@@ -611,7 +611,7 @@ configNginx() {
                       proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
                     }
                 }
-            EOF
+EOF
         else
             # VLESS+TCP+TLS
             # VLESS+TCP+XTLS
@@ -628,7 +628,7 @@ configNginx() {
                     }
                     $ROBOT_CONFIG
                 }
-            EOF
+EOF
         fi
     fi
 }
@@ -775,7 +775,7 @@ installXray() {
         
         [Install]
         WantedBy=multi-user.target
-    EOF
+EOF
     systemctl daemon-reload
     systemctl enable xray.service
 }
@@ -827,7 +827,7 @@ trojanConfig() {
             "tag": "blocked"
           }]
         }
-    EOF
+EOF
 }
 
 trojanXTLSConfig() {
@@ -878,7 +878,7 @@ trojanXTLSConfig() {
             "tag": "blocked"
           }]
         }
-    EOF
+EOF
 }
 
 vmessConfig() {
@@ -907,7 +907,7 @@ vmessConfig() {
             "tag": "blocked"
           }]
         }
-    EOF
+EOF
 }
 
 vmessKCPConfig() {
@@ -948,7 +948,7 @@ vmessKCPConfig() {
             "tag": "blocked"
           }]
         }
-    EOF
+EOF
 }
 
 vmessTLSConfig() {
@@ -992,7 +992,7 @@ vmessTLSConfig() {
             "tag": "blocked"
           }]
         }
-    EOF
+EOF
 }
 
 vmessWSConfig() {
@@ -1032,7 +1032,7 @@ vmessWSConfig() {
             "tag": "blocked"
           }]
         }
-    EOF
+EOF
 }
 
 vlessTLSConfig() {
@@ -1085,7 +1085,7 @@ vlessTLSConfig() {
             "tag": "blocked"
           }]
         }
-    EOF
+EOF
 }
 
 vlessXTLSConfig() {
@@ -1139,7 +1139,7 @@ vlessXTLSConfig() {
             "tag": "blocked"
           }]
         }
-    EOF
+EOF
 }
 
 vlessWSConfig() {
@@ -1179,7 +1179,7 @@ vlessWSConfig() {
             "tag": "blocked"
           }]
         }
-    EOF
+EOF
 }
 
 vlessKCPConfig() {
@@ -1222,7 +1222,7 @@ vlessKCPConfig() {
             "tag": "blocked"
           }]
         }
-    EOF
+EOF
 }
 
 configXray() {
@@ -1277,7 +1277,7 @@ install() {
     getData
     checkCentOS8
     ${PACKAGE_UPDATE[int]}
-    ${PACKAGE_INSTALL[int]} wget curl sudo vim unzip tar gcc openssl net-tools
+    ${PACKAGE_INSTALL[int]} wget curl sudo vim unzip tar gcc openssl net-tools qrencode
     if [[ $SYSTEM != "CentOS" ]]; then
         ${PACKAGE_INSTALL[int]} libssl-dev g++
     fi
@@ -1520,6 +1520,8 @@ outputTrojan() {
         echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
         echo -e "   ${BLUE}Trojan链接:${PLAIN} $RED$link$PLAIN"
     fi
+    echo -e "   ${BLUE}二维码:${PLAIN}"
+    qrencode -o - -t ansi "$link"
 }
 
 outputVmessTLS() {
