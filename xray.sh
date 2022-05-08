@@ -129,16 +129,21 @@ statusText() {
 }
 
 normalizeVersion() {
-	latestXrayVer=v$(curl -Ls "https://data.jsdelivr.com/v1/package/resolve/gh/XTLS/Xray-core" | grep '"version":' | sed -E 's/.*"([^"]+)".*/\1/')
-	if [ -n "$1" ]; then
-		case "$1" in
-			v*) echo "$1" ;;
-			http*) echo $latestXrayVer ;;
-			*) echo "v$1" ;;
-		esac
-	else
-		echo ""
-	fi
+    if [ -n "$1" ]; then
+        case "$1" in
+            v*)
+                echo "$1"
+            ;;
+            http*)
+                echo "v1.4.2"
+            ;;
+            *)
+                echo "v$1"
+            ;;
+        esac
+    else
+        echo ""
+    fi
 }
 
 # 1: new Xray. 0: no. 1: yes. 2: not installed. 3: check failed.
@@ -146,8 +151,9 @@ getVersion() {
 	VER=$(/usr/local/bin/xray version 2>/dev/null | head -n1 | awk '{print $2}')
 	RETVAL=$?
 	CUR_VER="$(normalizeVersion "$(echo "$VER" | head -n 1 | cut -d " " -f2)")"
-	TAG_URL="https://data.jsdelivr.com/v1/package/resolve/gh/XTLS/Xray-core"
-	NEW_VER="$(normalizeVersion "$(curl -s "${TAG_URL}" --connect-timeout 10 | grep 'version' | cut -d\" -f4)")"
+	TAG_URL="https://api.github.com/repos/XTLS/Xray-core/releases/latest"
+	NEW_VER="$(normalizeVersion "$(curl -s "${TAG_URL}" --connect-timeout 10 | grep 'tag_name' | cut -d\" -f4)")"
+	echo "XXX $NEW_VER"
 
 	if [[ $? -ne 0 ]] || [[ $NEW_VER == "" ]]; then
 		red "检测 Xray 版本失败，可能是VPS网络错误，请检查后重试"
