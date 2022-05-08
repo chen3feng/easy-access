@@ -772,6 +772,7 @@ installXray() {
         ExecStart=/usr/local/bin/xray run -config /usr/local/etc/xray/config.json
         Restart=on-failure
         RestartPreventExitStatus=23
+        LimitNOFILE=100000
         
         [Install]
         WantedBy=multi-user.target
