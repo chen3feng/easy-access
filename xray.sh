@@ -153,7 +153,6 @@ getVersion() {
     CUR_VER="$(normalizeVersion "$(echo "$VER" | head -n 1 | cut -d " " -f2)")"
     TAG_URL="https://api.github.com/repos/XTLS/Xray-core/releases/latest"
     NEW_VER="$(normalizeVersion "$(curl -s "${TAG_URL}" --connect-timeout 10 | grep 'tag_name' | cut -d\" -f4)")"
-    echo "XXX $NEW_VER"
 
     if [[ $? -ne 0 ]] || [[ $NEW_VER == "" ]]; then
         red "检测 Xray 版本失败，可能是VPS网络错误，请检查后重试"
