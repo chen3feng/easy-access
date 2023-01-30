@@ -190,6 +190,17 @@ archAffix() {
 	return 0
 }
 
+resolveIp() {
+	for ((i=0; i<10; i++)); do
+		resolve=`host $1 | grep 'has address' | awk '{print $NF}'`
+		if [[ -n "$resolve" ]]; then
+			echo $resolve
+			break
+		fi
+	done
+
+}
+
 getData() {
 	if [[ "$TLS" == "true" || "$XTLS" == "true" ]]; then
 		echo ""
@@ -218,7 +229,9 @@ getData() {
 			KEY_FILE="/usr/local/etc/xray/${DOMAIN}.key"
 		else
 			# resolve=$(curl -sm8 ipget.net/?ip=${DOMAIN})
-			resolve=`host ${DOMAIN} | awk '{print $NF}'`
+			# resolve=`host ${DOMAIN} | awk '{print $NF}'`
+			resolve=`resolveIp $DOMAIN`
+			echo $resolve
 			if [[ $resolve != $IP ]]; then
 				yellow "${DOMAIN} 解析结果：${resolve}"
 				red "域名未解析到当前服务器IP(${IP})！"
@@ -277,6 +290,11 @@ getData() {
 		read -p "请设置trojan密码（不输则随机生成）:" PASSWORD
 		[[ -z "$PASSWORD" ]] && PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)
 		yellow " trojan密码：$PASSWORD"
+	else
+		read -p "请设置用户ID（不输则随机生成）:" UUID
+		if [[ -z "${UUID}" ]]; then
+			UUID="$(cat '/proc/sys/kernel/random/uuid')"
+		fi
 	fi
 	if [[ "$XTLS" == "true" ]]; then
 		echo ""
@@ -885,7 +903,6 @@ trojanXTLSConfig() {
 }
 
 vmessConfig() {
-	local uuid="$(cat '/proc/sys/kernel/random/uuid')"
 	cat >$CONFIG_FILE <<-EOF
 		{
 		  "inbounds": [{
@@ -894,7 +911,7 @@ vmessConfig() {
 		    "settings": {
 		      "clients": [
 		        {
-		          "id": "$uuid",
+		          "id": "$UUID",
 		          "level": 1,
 		          "alterId": 0
 		        }
@@ -914,7 +931,6 @@ vmessConfig() {
 }
 
 vmessKCPConfig() {
-	local uuid="$(cat '/proc/sys/kernel/random/uuid')"
 	cat >$CONFIG_FILE <<-EOF
 		{
 		  "inbounds": [{
@@ -923,7 +939,7 @@ vmessKCPConfig() {
 		    "settings": {
 		      "clients": [
 		        {
-		          "id": "$uuid",
+		          "id": "$UUID",
 		          "level": 1,
 		          "alterId": 0
 		        }
@@ -955,7 +971,6 @@ vmessKCPConfig() {
 }
 
 vmessTLSConfig() {
-	local uuid="$(cat '/proc/sys/kernel/random/uuid')"
 	cat >$CONFIG_FILE <<-EOF
 		{
 		  "inbounds": [{
@@ -964,7 +979,7 @@ vmessTLSConfig() {
 		    "settings": {
 		      "clients": [
 		        {
-		          "id": "$uuid",
+		          "id": "$UUID",
 		          "level": 1,
 		          "alterId": 0
 		        }
@@ -999,7 +1014,6 @@ vmessTLSConfig() {
 }
 
 vmessWSConfig() {
-	local uuid="$(cat '/proc/sys/kernel/random/uuid')"
 	cat >$CONFIG_FILE <<-EOF
 		{
 		  "inbounds": [{
@@ -1009,7 +1023,7 @@ vmessWSConfig() {
 		    "settings": {
 		      "clients": [
 		        {
-		          "id": "$uuid",
+		          "id": "$UUID",
 		          "level": 1,
 		          "alterId": 0
 		        }
@@ -1039,7 +1053,6 @@ vmessWSConfig() {
 }
 
 vlessTLSConfig() {
-	local uuid="$(cat '/proc/sys/kernel/random/uuid')"
 	cat >$CONFIG_FILE <<-EOF
 		{
 		  "inbounds": [{
@@ -1048,7 +1061,7 @@ vlessTLSConfig() {
 		    "settings": {
 		      "clients": [
 		        {
-		          "id": "$uuid",
+		          "id": "$UUID",
 		          "level": 0
 		        }
 		      ],
@@ -1092,7 +1105,6 @@ vlessTLSConfig() {
 }
 
 vlessXTLSConfig() {
-	local uuid="$(cat '/proc/sys/kernel/random/uuid')"
 	cat >$CONFIG_FILE <<-EOF
 		{
 		  "inbounds": [{
@@ -1101,7 +1113,7 @@ vlessXTLSConfig() {
 		    "settings": {
 		      "clients": [
 		        {
-		          "id": "$uuid",
+		          "id": "$UUID",
 		          "flow": "$FLOW",
 		          "level": 0
 		        }
@@ -1146,7 +1158,6 @@ vlessXTLSConfig() {
 }
 
 vlessWSConfig() {
-	local uuid="$(cat '/proc/sys/kernel/random/uuid')"
 	cat >$CONFIG_FILE <<-EOF
 		{
 		  "inbounds": [{
@@ -1156,7 +1167,7 @@ vlessWSConfig() {
 		    "settings": {
 		        "clients": [
 		            {
-		                "id": "$uuid",
+		                "id": "$UUID",
 		                "level": 0
 		            }
 		        ],
@@ -1186,7 +1197,6 @@ vlessWSConfig() {
 }
 
 vlessKCPConfig() {
-	local uuid="$(cat '/proc/sys/kernel/random/uuid')"
 	cat >$CONFIG_FILE <<-EOF
 		{
 		  "inbounds": [{
@@ -1195,7 +1205,7 @@ vlessKCPConfig() {
 		    "settings": {
 		      "clients": [
 		        {
-		          "id": "$uuid",
+		          "id": "$UUID",
 		          "level": 0
 		        }
 		      ],
@@ -1280,7 +1290,7 @@ install() {
 	getData
 	checkCentOS8
 	${PACKAGE_UPDATE[int]}
-	${PACKAGE_INSTALL[int]} wget curl sudo vim unzip tar gcc openssl net-tools qrencode
+	${PACKAGE_INSTALL[int]} wget curl sudo vim unzip tar gcc openssl net-tools qrencode bind-utils
 	if [[ $SYSTEM != "CentOS" ]]; then
 		${PACKAGE_INSTALL[int]} libssl-dev g++
 	fi
